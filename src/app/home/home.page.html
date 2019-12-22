@@ -9,7 +9,7 @@
 <ion-content class="content-page">
   <div class="question-box">
     <div class="question">
-      <p>Em que ano nasceu o apresentador Sílvio Santos, atualmente no SBT?</p>
+      <p style="margin-right: 6px;">{{ question.text }}</p>
       <div>
         <div class="time">{{ questionTime }}</div>
       </div>
@@ -17,8 +17,8 @@
   </div>
 
   <div class="answers">
-    <div (click)="answerQuestion(answer)" *ngFor="let answer of asnwers; let i = index;">
-      <!-- <ion-ripple-effect></ion-ripple-effect> -->
+    <div class="ripple" (click)="answerQuestion(answer)" *ngFor="let answer of question.asnwers; let i = index;">
+      
       <span class="number">{{ i+1 }}</span>
       <span class="answer">{{ answer.desc }}</span>
     </div>
