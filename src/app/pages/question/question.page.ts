@@ -1,18 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { QuestionsService } from 'src/app/services/questions.service';
 import { Question } from 'src/app/dto/question.dto';
-import { LoadingController } from '@ionic/angular';
-import { Observable, of } from 'rxjs';
+import { LoadingController, AlertController } from '@ionic/angular';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-question',
   templateUrl: './question.page.html',
   styleUrls: ['./question.page.scss'],
 })
-export class QuestionPage implements OnInit {
+export class QuestionPage implements OnInit, OnDestroy {
 
   question: Question;
-  timer: number = 30;
+  timer: number = 10;
   offset: number = 1000;
 
   mapLiteral = {
@@ -27,34 +27,71 @@ export class QuestionPage implements OnInit {
     amount: 0,
   };
 
+  timerID: any;
+
   constructor(
     private questionService: QuestionsService,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private alertCtrl: AlertController,
+    private router: Router
   ) { }
+
+
+  ngOnDestroy(): void {
+    if(this.timerID) clearInterval(this.timerID);
+  }
 
   ngOnInit() {
     this.question = this.questionService.questions[0];
 
-    const intervalID = setInterval(() => {
-      if(this.timer === 0) return clearInterval(intervalID);
+    this.timerID = setInterval(async () => {
+      if(this.timer === 0) {
+        clearInterval(this.timerID);
+        const theAlert = await this.alertCtrl.create({
+          header: 'Que pena',
+          message: 'Seu tempo acabou!',
+          buttons: [
+            {
+              text: 'OK',
+              role: 'ok',
+              handler: () => {
+                this.router.navigate(['/menu'], {replaceUrl: true});
+              }
+            }
+          ]
+        });
+        theAlert.present();
+        return;
+      }
       this.timer--;
     }, 1000);
   }
 
   async answerQuestion(answer: {text: string, right: boolean}) {
 
-
     if(answer.right) {
-
       if(this.metadata.currentQuestion === 15) {
-        alert('Pergunta final');
+        const theAlert = await this.alertCtrl.create({
+          header: 'Parabéns',
+          message: 'Você ganhout UM MILHÃO DE REAIS!!!',
+          buttons: [
+            {
+              text: 'OK',
+              role: 'ok',
+              handler: () => {
+                this.router.navigate(['/menu'], {replaceUrl: true});
+              }
+            }
+          ]
+        });
+        theAlert.present();
         return;
       }
 
-      const alertMessage = await this.loadingCtrl.create({
+      const loadingDialog = await this.loadingCtrl.create({
         message: 'Carregando...',
       });
-      alertMessage.present();
+      loadingDialog.present();
       this.metadata.currentQuestion++;
 
       // acumulado é igual ao valor se acertar
@@ -75,12 +112,27 @@ export class QuestionPage implements OnInit {
 
 
       this.question = this.questionService.questions[this.metadata.currentQuestion];
-      alertMessage.dismiss();
-      this.timer = 30;
-      // setTimeout(() => {
-      //   alertMessage.dismiss();
-      //   this.timer = 30;
-      // }, 2000);
+      loadingDialog.dismiss();
+      this.timer = 5;
+    }else {
+
+      const title: string = this.metadata.currentQuestion == 15 ? 'PERDEU TUDO' : 'Que pena';
+      const body: string = this.metadata.currentQuestion == 15 ? `Você foi bem mas no final perdeu tudo.` : `Você errou. Mas vai levar para casa o prêmio de R$ ${this.metadata.amount/2}`;
+
+      const theAlert = await this.alertCtrl.create({
+        header: title,
+        message: body,
+        buttons: [
+          {
+            text: 'OK',
+            role: 'ok',
+            handler: () => {
+              this.router.navigate(['/menu'], {replaceUrl: true});
+            }
+          }
+        ]
+      });
+      theAlert.present();
     }
   }
 
