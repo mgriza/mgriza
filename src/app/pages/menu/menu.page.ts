@@ -17,11 +17,15 @@ export class MenuPage implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-    this.nativeAudio.preloadComplex('intro', 'assets/intro.wav', .2, 1, 0).then(() => {
+    this.nativeAudio.preloadComplex('intro', 'assets/audios/intro.wav', .2, 1, 0).then(() => {
       this.nativeAudio.loop('intro');
-    });
+    }).catch(err => {
+      alert(err.toString());
+    })
 
-    this.nativeAudio.preloadSimple('vai-comecar', 'assets/vai-comecar.wav')
+    this.nativeAudio.preloadSimple('vai-comecar', 'assets/audios/vai-comecar.wav').catch((err) => {
+      alert('Preload simple error: ' + err.toString())
+    });
   }
 
 
@@ -30,8 +34,11 @@ export class MenuPage implements OnInit, OnChanges {
   }
 
   async toQuestion() {
-    this.nativeAudio.stop('intro');
-    await this.nativeAudio.play('vai-comercar');
+    await this.nativeAudio.play('vai-comecar').catch(err => {
+      alert('Houve um erro');
+      alert(JSON.stringify(err));
+    });
+    await this.nativeAudio.stop('intro');
     this.router.navigate(['/', 'question']);
   }
 

@@ -7,6 +7,7 @@ import { IonicModule } from '@ionic/angular';
 import { MenuPageRoutingModule } from './menu-routing.module';
 
 import { MenuPage } from './menu.page';
+import { NativeAudio } from '@ionic-native/native-audio/ngx';
 
 @NgModule({
   imports: [
@@ -15,6 +16,7 @@ import { MenuPage } from './menu.page';
     IonicModule,
     MenuPageRoutingModule
   ],
-  declarations: [MenuPage]
+  declarations: [MenuPage],
+  providers: [NativeAudio]
 })
 export class MenuPageModule {}
